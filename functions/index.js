@@ -12,22 +12,23 @@ const getDataFromCsv = async filePath => {
   return result;
 }
 
-app.get('/covid19/:location', (req, res) => {
+app.get('/covid19', (req, res) => {
   const file_path = `https://covid.ourworldindata.org/data/ecdc/full_data.csv`;
   getDataFromCsv(file_path)
     .then(response => {
-      console.log(req.params.location)
       const json = csvSync(response);
       const data = json
-        .filter((x, index) => index !== 0 && x[1] === req.params.location)
+        .filter((x, index) => index !== 0)
+        // .filter((x, index) => index !== 0 && x[1] === req.params.location)
         .map(x => {
           return {
             date: x[0],
             location: x[1],
-            new_cases: x[2],
-            new_deaths: x[3],
-            total_cases: x[4],
-            total_deaths: x[5],
+            new_cases: Number(x[2]),
+            new_deaths: Number(x[3]),
+            total_cases: Number(x[4]),
+            total_deaths: Number(x[5]),
+            death_per_case: Math.round((Number(x[5]) * 100 * 100) / Number(x[4])) / 100,
           }
         })
       res.send(data)
